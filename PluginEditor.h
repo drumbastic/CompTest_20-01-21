@@ -26,18 +26,31 @@ public:
 
 private:
     // Create sliders as pointers to the object
-    juce::ScopedPointer<juce::Slider> thresholdKnob;
-    juce::ScopedPointer<juce::Slider> attackKnob;
-    juce::ScopedPointer<juce::Slider> ratioKnob;
-    juce::ScopedPointer<juce::Slider> releaseKnob;
-    juce::ScopedPointer<juce::Slider> gainKnob;
+    //juce::ScopedPointer<juce::Slider> thresholdKnob;
+    //juce::ScopedPointer<juce::Slider> attackKnob;
+    //juce::ScopedPointer<juce::Slider> ratioKnob;
+    //juce::ScopedPointer<juce::Slider> releaseKnob;
+    //juce::ScopedPointer<juce::Slider> gainKnob;
+
+    std::unique_ptr<juce::Slider> thresholdKnob;
+    std::unique_ptr<juce::Slider> attackKnob;
+    std::unique_ptr<juce::Slider> ratioKnob;
+    std::unique_ptr<juce::Slider> releaseKnob;
+    std::unique_ptr<juce::Slider> gainKnob;
+
 
     // Create the slider attachments
-    juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
-    juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
-    juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
-    juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
-    juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
+    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
+    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
+    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
+    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
 
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
