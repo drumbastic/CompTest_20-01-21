@@ -27,11 +27,13 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
     state->createAndAddParameter("threshold", "Threshold", "Threshold", juce::NormalisableRange<float>(-50.f, 0.0f, 5.f), -40.0, nullptr, nullptr);
     state->createAndAddParameter("ratio", "Ratio", "Ratio", juce::NormalisableRange<float>(1.0f, 30.0f, 3.f), 15.0, nullptr, nullptr);
     state->createAndAddParameter("attack", "Attack", "Attack", juce::NormalisableRange<float>(0.0f, 20.0f, 0.1), 10.0, nullptr, nullptr);
-    state->createAndAddParameter("release", "Release", "Release", juce::NormalisableRange<float>(0.0f,200.0f,0.1),100.0,nullptr,nullptr);
+    state->createAndAddParameter("release", "Release", "Release", juce::NormalisableRange<float>(0.0f, 200.0f, 0.1), 100.0, nullptr, nullptr);
+    state->createAndAddParameter("gain", "Gain", "Gain", juce::NormalisableRange<float>(0.0f,1.0f,0.1f),1,nullptr,nullptr);
     state->state = juce::ValueTree("threshold");
     state->state = juce::ValueTree("ratio");
     state->state = juce::ValueTree("attack");
     state->state = juce::ValueTree("release");
+    state->state = juce::ValueTree("gain");
 
     comp.setAttack(1.0f);
     comp.setRatio(1.0f);
@@ -159,6 +161,7 @@ void NewProjectAudioProcessor::updateParameters()
     float ratio = *state->getRawParameterValue("ratio");
     float attack = *state->getRawParameterValue("attack");
     float release = *state->getRawParameterValue("release");
+    //float gain = *state->getRawParameterValue("gain");
 
     comp.setThreshold(threshold);
     comp.setRatio(ratio);
