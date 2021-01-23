@@ -66,6 +66,7 @@ private:
 
     // Compressor object
     juce::dsp::Compressor<float> comp;
+    juce::dsp::Gain<float> gain;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)

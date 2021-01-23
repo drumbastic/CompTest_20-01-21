@@ -28,7 +28,7 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
     state->createAndAddParameter("ratio", "Ratio", "Ratio", juce::NormalisableRange<float>(1.0f, 30.0f, 3.f), 15.0, nullptr, nullptr);
     state->createAndAddParameter("attack", "Attack", "Attack", juce::NormalisableRange<float>(0.0f, 20.0f, 0.1), 10.0, nullptr, nullptr);
     state->createAndAddParameter("release", "Release", "Release", juce::NormalisableRange<float>(0.0f, 200.0f, 0.1), 100.0, nullptr, nullptr);
-    state->createAndAddParameter("gain", "Gain", "Gain", juce::NormalisableRange<float>(0.0f,1.0f,0.1f),1,nullptr,nullptr);
+    state->createAndAddParameter("gain", "Gain", "Gain", juce::NormalisableRange<float>(-100.0f,0.0f,1.f),-20.0, nullptr, nullptr);
     state->state = juce::ValueTree("threshold");
     state->state = juce::ValueTree("ratio");
     state->state = juce::ValueTree("attack");
@@ -39,6 +39,8 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
     comp.setRatio(1.0f);
     comp.setThreshold(1.0f);
     comp.setRelease(1.0f);
+
+    gain.setGainDecibels(10.0f);
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()   
@@ -120,6 +122,7 @@ void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     spec.numChannels = getTotalNumInputChannels();
 
     comp.prepare(spec);
+    gain.prepare(spec);
 }
 
 void NewProjectAudioProcessor::releaseResources()
@@ -161,12 +164,14 @@ void NewProjectAudioProcessor::updateParameters()
     float ratio = *state->getRawParameterValue("ratio");
     float attack = *state->getRawParameterValue("attack");
     float release = *state->getRawParameterValue("release");
-    //float gain = *state->getRawParameterValue("gain");
+    float gn = *state->getRawParameterValue("gain");
 
     comp.setThreshold(threshold);
     comp.setRatio(ratio);
     comp.setAttack(attack);
     comp.setRelease(release);
+
+    gain.setGainDecibels(gn);
 }
 
 
@@ -175,6 +180,7 @@ void NewProjectAudioProcessor::process(juce::dsp::ProcessContextReplacing<float>
     // Do processing here and output
     updateParameters();
    
+    gain.process(context);
     comp.process(context);
 }
 
