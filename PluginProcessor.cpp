@@ -121,6 +121,9 @@ void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumInputChannels();
 
+    comp.reset();
+    gain.reset();
+
     comp.prepare(spec);
     gain.prepare(spec);
 }
