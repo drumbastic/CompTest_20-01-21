@@ -14,29 +14,24 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Instaniate knobs, make visible and set styles
-    //addAndMakeVisible(thresholdKnob = new juce::Slider("Threshold"));
     addAndMakeVisible(*(thresholdKnob = std::make_unique<juce::Slider>()));
     thresholdKnob->setSliderStyle(juce::Slider::Rotary);
     thresholdKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     thresholdKnob->setPopupDisplayEnabled(false, true, this);
     thresholdKnob->setTextValueSuffix(" dB");
 
-    //addAndMakeVisible(ratioKnob = new juce::Slider("Ratio"));
     addAndMakeVisible(*(ratioKnob = std::make_unique<juce::Slider>()));
     ratioKnob->setSliderStyle(juce::Slider::Rotary);
     ratioKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     ratioKnob->setPopupDisplayEnabled(false,true,this);
     ratioKnob->setTextValueSuffix(":1");
 
-    //addAndMakeVisible(attackKnob = new juce::Slider("Attack"));
     addAndMakeVisible(*(attackKnob = std::make_unique<juce::Slider>()));
     attackKnob->setSliderStyle(juce::Slider::Rotary);
     attackKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     attackKnob->setPopupDisplayEnabled(false, true, this);
     attackKnob->setTextValueSuffix("ms");
 
-
-    //addAndMakeVisible(releaseKnob = new juce::Slider("Release"));
     addAndMakeVisible(*(releaseKnob = std::make_unique<juce::Slider>()));
     releaseKnob->setSliderStyle(juce::Slider::Rotary);
     releaseKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
@@ -51,13 +46,7 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     gainKnob->setTextValueSuffix("dB");
 
 
-    // Attach the Knobs to the processor
-    /*thresholdAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "threshold", *thresholdKnob);
-        ratioAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "ratio",     *ratioKnob);
-       attackAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "attack",    *attackKnob);
-      releaseAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "release",   *releaseKnob);
-         gainAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "gain",      *gainKnob);*/
-    
+    // Attach the Knobs to the processor    
     thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "threshold", *thresholdKnob);
         ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "ratio",     *ratioKnob);
        attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "attack",    *attackKnob);
@@ -86,8 +75,6 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawFittedText("Attack",    ((getWidth() / 6) * 4) - (100 / 2), (getHeight() / 2) + 5, 100, 100, juce::Justification::centred, false);
     g.drawFittedText("Release",   ((getWidth() / 6) * 5) - (100 / 2), (getHeight() / 2) + 5, 100, 100, juce::Justification::centred, false);
     g.drawFittedText("Gain",      ((getWidth() / 6) * 1) - (100 / 2), (getHeight() / 2) + 5, 100, 100, juce::Justification::centred, false);
-
-    //g.drawFittedText(, ((getWidth() / 6) * 1) - (100 / 2), (getHeight() / 2) - 50, 100, 100, juce::Justification::centred, false);
 }
 
 void NewProjectAudioProcessorEditor::resized()

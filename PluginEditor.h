@@ -26,12 +26,6 @@ public:
 
 private:
     // Create sliders as pointers to the object
-    //juce::ScopedPointer<juce::Slider> thresholdKnob;
-    //juce::ScopedPointer<juce::Slider> attackKnob;
-    //juce::ScopedPointer<juce::Slider> ratioKnob;
-    //juce::ScopedPointer<juce::Slider> releaseKnob;
-    //juce::ScopedPointer<juce::Slider> gainKnob;
-
     std::unique_ptr<juce::Slider> thresholdKnob;
     std::unique_ptr<juce::Slider> attackKnob;
     std::unique_ptr<juce::Slider> ratioKnob;
@@ -40,12 +34,6 @@ private:
 
 
     // Create the slider attachments
-    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
-    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
-    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
-    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
-    //juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
-
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
