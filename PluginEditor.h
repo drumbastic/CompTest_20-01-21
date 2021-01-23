@@ -32,7 +32,6 @@ private:
     juce::ScopedPointer<juce::Slider> releaseKnob;
     juce::ScopedPointer<juce::Slider> gainKnob;
 
-
     // Create the slider attachments
     juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
     juce::ScopedPointer<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
