@@ -14,32 +14,37 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Instaniate knobs, make visible and set styles
-    addAndMakeVisible(thresholdKnob = new juce::Slider("Threshold"));
+    //addAndMakeVisible(thresholdKnob = new juce::Slider("Threshold"));
+    addAndMakeVisible(*(thresholdKnob = std::make_unique<juce::Slider>()));
     thresholdKnob->setSliderStyle(juce::Slider::Rotary);
     thresholdKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     thresholdKnob->setPopupDisplayEnabled(false, true, this);
     thresholdKnob->setTextValueSuffix(" dB");
 
-    addAndMakeVisible(ratioKnob = new juce::Slider("Ratio"));
+    //addAndMakeVisible(ratioKnob = new juce::Slider("Ratio"));
+    addAndMakeVisible(*(ratioKnob = std::make_unique<juce::Slider>()));
     ratioKnob->setSliderStyle(juce::Slider::Rotary);
     ratioKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     ratioKnob->setPopupDisplayEnabled(false,true,this);
     ratioKnob->setTextValueSuffix(":1");
 
-    addAndMakeVisible(attackKnob = new juce::Slider("Attack"));
+    //addAndMakeVisible(attackKnob = new juce::Slider("Attack"));
+    addAndMakeVisible(*(attackKnob = std::make_unique<juce::Slider>()));
     attackKnob->setSliderStyle(juce::Slider::Rotary);
     attackKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     attackKnob->setPopupDisplayEnabled(false, true, this);
     attackKnob->setTextValueSuffix("ms");
 
 
-    addAndMakeVisible(releaseKnob = new juce::Slider("Release"));
+    //addAndMakeVisible(releaseKnob = new juce::Slider("Release"));
+    addAndMakeVisible(*(releaseKnob = std::make_unique<juce::Slider>()));
     releaseKnob->setSliderStyle(juce::Slider::Rotary);
     releaseKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     releaseKnob->setPopupDisplayEnabled(false, true, this);
     releaseKnob->setTextValueSuffix("ms");
 
-    addAndMakeVisible(gainKnob = new juce::Slider("Gain"));
+    //addAndMakeVisible(gainKnob = new juce::Slider("Gain"));
+    addAndMakeVisible(*(gainKnob = std::make_unique<juce::Slider>()));
     gainKnob->setSliderStyle(juce::Slider::Rotary);
     gainKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     gainKnob->setPopupDisplayEnabled(false, true, this);
@@ -47,11 +52,17 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 
 
     // Attach the Knobs to the processor
-    thresholdAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "threshold", *thresholdKnob);
+    /*thresholdAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "threshold", *thresholdKnob);
         ratioAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "ratio",     *ratioKnob);
        attackAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "attack",    *attackKnob);
       releaseAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "release",   *releaseKnob);
-         gainAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "gain",      *gainKnob);
+         gainAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getState(), "gain",      *gainKnob);*/
+    
+    thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "threshold", *thresholdKnob);
+        ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "ratio",     *ratioKnob);
+       attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "attack",    *attackKnob);
+      releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "release",   *releaseKnob);
+         gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "gain",      *gainKnob);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
