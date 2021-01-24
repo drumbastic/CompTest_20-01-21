@@ -41,6 +41,8 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
     comp.setRelease(1.0f);
 
     gain.setGainDecibels(10.0f);
+
+    oversamp.setUsingIntegerLatency(true);
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()   
@@ -123,6 +125,7 @@ void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     comp.reset();
     gain.reset();
+    oversamp.reset();
 
     comp.prepare(spec);
     gain.prepare(spec);
@@ -183,8 +186,15 @@ void NewProjectAudioProcessor::process(juce::dsp::ProcessContextReplacing<float>
     // Do processing here and output
     updateParameters();
    
-    gain.process(context);
-    comp.process(context);
+    if (filteringEnabled)
+    {
+        // Add oversampling processing here
+        gain.process(context);
+        comp.process(context);
+    } else {
+        gain.process(context);
+        comp.process(context);
+    }
 }
 
 void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -211,6 +221,11 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 juce::AudioProcessorValueTreeState& NewProjectAudioProcessor::getState()
 {
     return *state;
+}
+
+void NewProjectAudioProcessor::setFilteringEnbaled(const bool shouldBeEnabled)
+{
+    filteringEnabled = shouldBeEnabled;
 }
 
 //==============================================================================

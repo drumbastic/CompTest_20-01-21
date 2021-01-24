@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <string> 
 
 //==============================================================================
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
@@ -38,13 +39,11 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     releaseKnob->setPopupDisplayEnabled(false, true, this);
     releaseKnob->setTextValueSuffix("ms");
 
-    //addAndMakeVisible(gainKnob = new juce::Slider("Gain"));
     addAndMakeVisible(*(gainKnob = std::make_unique<juce::Slider>()));
     gainKnob->setSliderStyle(juce::Slider::Rotary);
     gainKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     gainKnob->setPopupDisplayEnabled(false, true, this);
     gainKnob->setTextValueSuffix("dB");
-
 
     // Attach the Knobs to the processor    
     thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "threshold", *thresholdKnob);
@@ -52,6 +51,16 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
        attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "attack",    *attackKnob);
       releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "release",   *releaseKnob);
          gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "gain",      *gainKnob);
+
+    // Instantiate Text button
+    addAndMakeVisible(*(oversampButton = std::make_unique<juce::TextButton>("oversamp")));
+    oversampButton->addListener(this);
+    oversampButton->setButtonText("0x");
+    oversampButton->setClickingTogglesState("true");
+    //oversampButton->setToggleState("false", juce::dontSendNotification);
+    oversampButton->setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::green);
+    oversampButton->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -72,7 +81,10 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
     g.setFont (15.0f);
 
     //First row
-    g.drawFittedText("Gain", ((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
+    g.drawFittedText("Gain",        ((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
+    g.drawFittedText("Oversampling", ((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
+    // print state of toggle
+    //g.drawFittedText(std::to_string(oversampButton->getToggleState()),((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
 
     // Second row
     g.drawFittedText("Threshold", ((getWidth() / 5) * 1) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) + 5, 100, 100, juce::Justification::centred, false);
@@ -87,7 +99,8 @@ void NewProjectAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     //First row
-         gainKnob->setBounds(((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) - (100 / 2), 100, 100);
+          gainKnob->setBounds(((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) - (100 / 2), 100, 100);
+    oversampButton->setBounds(((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) / 2) - (100 / 2), 100, 100);
 
     // Second row
     thresholdKnob->setBounds(((getWidth() / 5) * 1) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
@@ -96,4 +109,16 @@ void NewProjectAudioProcessorEditor::resized()
       releaseKnob->setBounds(((getWidth() / 5) * 4) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
 
 
+}
+
+void NewProjectAudioProcessorEditor::buttonClicked(juce::Button* button)
+{
+    if (oversampButton->getToggleState() == true) {
+        oversampButton->setButtonText("2x");
+        audioProcessor.setFilteringEnbaled(oversampButton->getToggleState());
+    }
+    if (oversampButton->getToggleState() == false) {
+        oversampButton->setButtonText("0x");
+        audioProcessor.setFilteringEnbaled(oversampButton->getToggleState());
+    }
 }

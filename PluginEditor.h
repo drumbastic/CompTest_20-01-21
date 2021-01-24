@@ -15,7 +15,7 @@
 /**
 */
 class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor,
-                                        public Button::Listener
+                                        public juce::Button::Listener
 {
 public:
     NewProjectAudioProcessorEditor (NewProjectAudioProcessor&);
@@ -24,10 +24,9 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    void buttonClicked(juce::Button* button) override;
 
 private:
-
-
     // Create sliders as pointers to the object
     std::unique_ptr<juce::Slider> thresholdKnob;
     std::unique_ptr<juce::Slider> attackKnob;
@@ -35,13 +34,15 @@ private:
     std::unique_ptr<juce::Slider> releaseKnob;
     std::unique_ptr<juce::Slider> gainKnob;
 
-
     // Create the slider attachments
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+
+    // Create toggle text button for oversample 
+    std::unique_ptr<juce::TextButton> oversampButton;
 
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
