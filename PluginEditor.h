@@ -14,7 +14,8 @@
 //==============================================================================
 /**
 */
-class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor
+class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor,
+                                        public Button::Listener
 {
 public:
     NewProjectAudioProcessorEditor (NewProjectAudioProcessor&);
@@ -25,6 +26,8 @@ public:
     void resized() override;
 
 private:
+
+
     // Create sliders as pointers to the object
     std::unique_ptr<juce::Slider> thresholdKnob;
     std::unique_ptr<juce::Slider> attackKnob;

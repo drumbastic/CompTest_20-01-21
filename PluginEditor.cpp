@@ -55,7 +55,7 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize(600, 200);
+    setSize(500, 300);
 }
 
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
@@ -70,20 +70,30 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText("Threshold", ((getWidth() / 6) * 2) - (100 / 2), (getHeight() / 2) + 5, 100, 100, juce::Justification::centred, false);
-    g.drawFittedText("Ratio",     ((getWidth() / 6) * 3) - (100 / 2), (getHeight() / 2) + 5, 100, 100, juce::Justification::centred, false);
-    g.drawFittedText("Attack",    ((getWidth() / 6) * 4) - (100 / 2), (getHeight() / 2) + 5, 100, 100, juce::Justification::centred, false);
-    g.drawFittedText("Release",   ((getWidth() / 6) * 5) - (100 / 2), (getHeight() / 2) + 5, 100, 100, juce::Justification::centred, false);
-    g.drawFittedText("Gain",      ((getWidth() / 6) * 1) - (100 / 2), (getHeight() / 2) + 5, 100, 100, juce::Justification::centred, false);
+
+    //First row
+    g.drawFittedText("Gain", ((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
+
+    // Second row
+    g.drawFittedText("Threshold", ((getWidth() / 5) * 1) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) + 5, 100, 100, juce::Justification::centred, false);
+    g.drawFittedText("Ratio",     ((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) + 5, 100, 100, juce::Justification::centred, false);
+    g.drawFittedText("Attack",    ((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) + 5, 100, 100, juce::Justification::centred, false);
+    g.drawFittedText("Release",   ((getWidth() / 5) * 4) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) + 5, 100, 100, juce::Justification::centred, false);
 }
 
 void NewProjectAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    thresholdKnob->setBounds(((getWidth() / 6) * 2) - (100 / 2), (getHeight() / 2) - (100 / 2), 100, 100);
-        ratioKnob->setBounds(((getWidth() / 6) * 3) - (100 / 2), (getHeight() / 2) - (100 / 2), 100, 100);
-       attackKnob->setBounds(((getWidth() / 6) * 4) - (100 / 2), (getHeight() / 2) - (100 / 2), 100, 100);
-      releaseKnob->setBounds(((getWidth() / 6) * 5) - (100 / 2), (getHeight() / 2) - (100 / 2), 100, 100);
-         gainKnob->setBounds(((getWidth() / 6) * 1) - (100 / 2), (getHeight() / 2) - (100 / 2), 100, 100);
+
+    //First row
+         gainKnob->setBounds(((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) - (100 / 2), 100, 100);
+
+    // Second row
+    thresholdKnob->setBounds(((getWidth() / 5) * 1) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
+        ratioKnob->setBounds(((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
+       attackKnob->setBounds(((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
+      releaseKnob->setBounds(((getWidth() / 5) * 4) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
+
+
 }
