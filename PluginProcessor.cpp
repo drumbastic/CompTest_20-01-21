@@ -22,13 +22,13 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
                        )
 #endif
 {
-    state = new juce::AudioProcessorValueTreeState(*this, nullptr);
+    *(state = std::make_unique<juce::AudioProcessorValueTreeState>(*this, nullptr));
 
     state->createAndAddParameter("threshold", "Threshold", "Threshold", juce::NormalisableRange<float>(-50.f, 0.0f, 5.f), -40.0, nullptr, nullptr);
     state->createAndAddParameter("ratio", "Ratio", "Ratio", juce::NormalisableRange<float>(1.0f, 30.0f, 3.f), 15.0, nullptr, nullptr);
     state->createAndAddParameter("attack", "Attack", "Attack", juce::NormalisableRange<float>(0.0f, 20.0f, 0.1), 10.0, nullptr, nullptr);
     state->createAndAddParameter("release", "Release", "Release", juce::NormalisableRange<float>(0.0f, 200.0f, 0.1), 100.0, nullptr, nullptr);
-    state->createAndAddParameter("gain", "Gain", "Gain", juce::NormalisableRange<float>(-100.0f,0.0f,1.f),-20.0, nullptr, nullptr);
+    state->createAndAddParameter("gain", "Gain", "Gain", juce::NormalisableRange<float>(-100.0f, 0.0f, 1.f), -20.0, nullptr, nullptr);
     state->state = juce::ValueTree("threshold");
     state->state = juce::ValueTree("ratio");
     state->state = juce::ValueTree("attack");
@@ -42,7 +42,6 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
 
     gain.setGainDecibels(10.0f);
 
-    oversamp.setUsingIntegerLatency(true);
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()   
@@ -119,16 +118,18 @@ void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     juce::dsp::ProcessSpec spec;
 
-    spec.sampleRate = sampleRate;
-    spec.maximumBlockSize = samplesPerBlock;
+    spec.sampleRate = sampleRate * 2; //set by nutton value
+    spec.maximumBlockSize = samplesPerBlock * 2; //set by nutton value
     spec.numChannels = getTotalNumInputChannels();
 
     comp.reset();
     gain.reset();
-    oversamp.reset();
+    oversamp.reset(new juce::dsp::Oversampling<float>(getNumOutputChannels(), 
+        2, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, false));
 
     comp.prepare(spec);
     gain.prepare(spec);
+    oversamp->initProcessing((size_t)samplesPerBlock);
 }
 
 void NewProjectAudioProcessor::releaseResources()
@@ -178,6 +179,13 @@ void NewProjectAudioProcessor::updateParameters()
     comp.setRelease(release);
 
     gain.setGainDecibels(gn);
+
+    //if (filteringEnabled)
+    //{
+    //    oversamp->factorOversampling = 1;
+    //}
+    //else
+    //    oversamp->factorOversampling = 2;
 }
 
 
@@ -185,16 +193,9 @@ void NewProjectAudioProcessor::process(juce::dsp::ProcessContextReplacing<float>
 {
     // Do processing here and output
     updateParameters();
-   
-    if (filteringEnabled)
-    {
-        // Add oversampling processing here
-        gain.process(context);
-        comp.process(context);
-    } else {
-        gain.process(context);
-        comp.process(context);
-    }
+
+    gain.process(context);
+    comp.process(context);
 }
 
 void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -211,11 +212,23 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+
     
     // Input to dsp module
-    juce::dsp::AudioBlock<float>block(buffer);
-    // Output from dsp module
-    process(juce::dsp::ProcessContextReplacing<float>(block));
+    juce::dsp::AudioBlock<float> block (buffer);
+
+    if (filteringEnabled) 
+    {
+        juce::dsp::AudioBlock<float> osBlock = oversamp->processSamplesUp(block);
+        process(juce::dsp::ProcessContextReplacing<float>(osBlock));
+        oversamp->processSamplesDown(block);
+    }
+    else 
+    {
+        // Output from dsp module
+        process(juce::dsp::ProcessContextReplacing<float>(block));
+    }
+    
 }
 
 juce::AudioProcessorValueTreeState& NewProjectAudioProcessor::getState()

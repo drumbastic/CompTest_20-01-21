@@ -64,12 +64,12 @@ public:
 private:
 
     // Create the state of the value tree
-    juce::ScopedPointer<juce::AudioProcessorValueTreeState> state;
+    std::unique_ptr<juce::AudioProcessorValueTreeState> state;
 
     // dsp objects
     juce::dsp::Gain<float> gain; 
     juce::dsp::Compressor<float> comp;
-    juce::dsp::Oversampling<float> oversamp;
+    std::unique_ptr<juce::dsp::Oversampling<float>> oversamp;
 
     // Set bool for Oversampling
     bool filteringEnabled;
