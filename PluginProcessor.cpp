@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <string> 
 
 //==============================================================================
 NewProjectAudioProcessor::NewProjectAudioProcessor()
@@ -31,11 +32,19 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
     state->createAndAddParameter("attack", "Attack", "Attack", juce::NormalisableRange<float>(0.0f, 20.0f, 0.1), 10.0, nullptr, nullptr);
     state->createAndAddParameter("release", "Release", "Release", juce::NormalisableRange<float>(0.0f, 200.0f, 0.1), 100.0, nullptr, nullptr);
     state->createAndAddParameter("gain", "Gain", "Gain", juce::NormalisableRange<float>(-100.0f, 0.0f, 1.f), -20.0, nullptr, nullptr);
+    state->createAndAddParameter("oversamp_menu",  // parameter ID
+                                "oversamp_menu",   // parameter name
+                                std::string(),     // parameter label (suffix)
+                                juce::NormalisableRange<float>(0.0f, 6.0f /*list size*/, 1.0f),    // range
+                                0.0f,              // default value
+                                nullptr,
+                                nullptr);
     state->state = juce::ValueTree("threshold");
     state->state = juce::ValueTree("ratio");
     state->state = juce::ValueTree("attack");
     state->state = juce::ValueTree("release");
     state->state = juce::ValueTree("gain");
+    state->state = juce::ValueTree("oversamp_menu");
  
     comp->setThreshold(-40.0);
     comp->setRatio(15.0);

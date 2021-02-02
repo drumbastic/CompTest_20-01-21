@@ -16,51 +16,52 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 {
     // Instaniate knobs, make visible and set styles
     addAndMakeVisible(*(thresholdKnob = std::make_unique<juce::Slider>()));
+    thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "threshold", *thresholdKnob);
     thresholdKnob->setSliderStyle(juce::Slider::Rotary);
     thresholdKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     thresholdKnob->setPopupDisplayEnabled(false, true, this);
     thresholdKnob->setTextValueSuffix(" dB");
 
     addAndMakeVisible(*(ratioKnob = std::make_unique<juce::Slider>()));
+    ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "ratio", *ratioKnob);
     ratioKnob->setSliderStyle(juce::Slider::Rotary);
     ratioKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     ratioKnob->setPopupDisplayEnabled(false,true,this);
     ratioKnob->setTextValueSuffix(":1");
 
     addAndMakeVisible(*(attackKnob = std::make_unique<juce::Slider>()));
+    attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "attack", *attackKnob);
     attackKnob->setSliderStyle(juce::Slider::Rotary);
     attackKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     attackKnob->setPopupDisplayEnabled(false, true, this);
     attackKnob->setTextValueSuffix("ms");
 
     addAndMakeVisible(*(releaseKnob = std::make_unique<juce::Slider>()));
+    releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "release", *releaseKnob);
     releaseKnob->setSliderStyle(juce::Slider::Rotary);
     releaseKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     releaseKnob->setPopupDisplayEnabled(false, true, this);
     releaseKnob->setTextValueSuffix("ms");
 
     addAndMakeVisible(*(gainKnob = std::make_unique<juce::Slider>()));
+    gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "gain", *gainKnob);
     gainKnob->setSliderStyle(juce::Slider::Rotary);
     gainKnob->setTextBoxStyle(juce::Slider::TextBoxAbove, true, 100, 20);
     gainKnob->setPopupDisplayEnabled(false, true, this);
     gainKnob->setTextValueSuffix("dB");
 
-    // Attach the Knobs to the processor    
-    thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "threshold", *thresholdKnob);
-        ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "ratio",     *ratioKnob);
-       attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "attack",    *attackKnob);
-      releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "release",   *releaseKnob);
-         gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(p.getState(), "gain",      *gainKnob);
-
-    // Instantiate Text button
-    addAndMakeVisible(*(oversampButton = std::make_unique<juce::TextButton>("oversamp")));
-    oversampButton->addListener(this);
-    oversampButton->setButtonText("0x");
-    oversampButton->setClickingTogglesState("true");
-    //oversampButton->setToggleState("false", juce::dontSendNotification);
-    oversampButton->setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::green);
-    oversampButton->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-
+    // Instantiate drop down menu
+    addAndMakeVisible(*(oversampMenu = std::make_unique<juce::ComboBox>("oversamp_menu")));
+    oversampMenu->setJustificationType(juce::Justification::centred);
+    oversampMenu->addItem("Off", Off);
+    oversampMenu->addItem("2x",  x2);
+    oversampMenu->addItem("4x",  x4);
+    oversampMenu->addItem("8x",  x8);
+    oversampMenu->addItem("16x", x16);
+    oversampMenu->addItem("32x", x32);  
+    oversampMenu->onChange = [this] { oversampleChanged(); };
+    oversampMenuAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(p.getState(), "oversamp_menu", *oversampMenu);
+    oversampMenu->setSelectedId(Off);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -99,26 +100,49 @@ void NewProjectAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     //First row
-          gainKnob->setBounds(((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) - (100 / 2), 100, 100);
-    oversampButton->setBounds(((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) / 2) - (100 / 2), 100, 100);
+        gainKnob->setBounds(((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) - (100 / 2), 100, 100);
+    oversampMenu->setBounds(((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) / 2) - (100 / 2), 100, 100);
 
     // Second row
     thresholdKnob->setBounds(((getWidth() / 5) * 1) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
         ratioKnob->setBounds(((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
        attackKnob->setBounds(((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
       releaseKnob->setBounds(((getWidth() / 5) * 4) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
-
-
 }
 
-void NewProjectAudioProcessorEditor::buttonClicked(juce::Button* button)
+void NewProjectAudioProcessorEditor::oversampleChanged()
 {
-    if (oversampButton->getToggleState() == true) {
-        oversampButton->setButtonText("2x");
-        audioProcessor.setFilteringEnbaled(oversampButton->getToggleState());
-    }
-    if (oversampButton->getToggleState() == false) {
-        oversampButton->setButtonText("0x");
-        audioProcessor.setFilteringEnbaled(oversampButton->getToggleState());
+    switch (oversampMenu->getSelectedId())
+    {
+    case Off: 
+        oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::white);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
+        break;
+    case x2:  
+        oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::lightyellow);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::black);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::black);
+        break;
+    case x4:  
+        oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::yellow);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::black);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::black);
+        break;
+    case x8:  
+        oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::orange);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::black);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::black);
+        break;
+    case x16: 
+        oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::orangered);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::white);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
+        break;
+    case x32: 
+        oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::red);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::white);
+        oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
+        break;
     }
 }
