@@ -67,12 +67,13 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState> state;
 
     // dsp objects
-    juce::dsp::Gain<float> gain; 
-    juce::dsp::Compressor<float> comp;
+    std::unique_ptr<juce::dsp::Gain<float>> gain; 
+    std::unique_ptr<juce::dsp::Compressor<float>> comp;
     std::unique_ptr<juce::dsp::Oversampling<float>> oversamp;
 
     // Set bool for Oversampling
     bool filteringEnabled;
+    int oversampAmount;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)

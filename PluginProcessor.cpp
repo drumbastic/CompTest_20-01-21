@@ -23,6 +23,8 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
 #endif
 {
     *(state = std::make_unique<juce::AudioProcessorValueTreeState>(*this, nullptr));
+    *(comp  = std::make_unique<juce::dsp::Compressor<float>>());
+    *(gain  = std::make_unique<juce::dsp::Gain<float>>());
 
     state->createAndAddParameter("threshold", "Threshold", "Threshold", juce::NormalisableRange<float>(-50.f, 0.0f, 5.f), -40.0, nullptr, nullptr);
     state->createAndAddParameter("ratio", "Ratio", "Ratio", juce::NormalisableRange<float>(1.0f, 30.0f, 3.f), 15.0, nullptr, nullptr);
@@ -34,14 +36,15 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
     state->state = juce::ValueTree("attack");
     state->state = juce::ValueTree("release");
     state->state = juce::ValueTree("gain");
+ 
+    comp->setThreshold(-40.0);
+    comp->setRatio(15.0);
+    comp->setAttack(10.0f);
+    comp->setRelease(100.0f);
 
-    comp.setAttack(1.0f);
-    comp.setRatio(1.0f);
-    comp.setThreshold(1.0f);
-    comp.setRelease(1.0f);
+    gain->setGainDecibels(10.0f);
 
-    gain.setGainDecibels(10.0f);
-
+    oversampAmount = 1;
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()   
@@ -116,19 +119,18 @@ void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 
-    juce::dsp::ProcessSpec spec;
+    std::unique_ptr<juce::dsp::ProcessSpec> spec = std::make_unique< juce::dsp::ProcessSpec>();
 
-    spec.sampleRate = sampleRate * 2; //set by nutton value
-    spec.maximumBlockSize = samplesPerBlock * 2; //set by nutton value
-    spec.numChannels = getTotalNumInputChannels();
+    spec->sampleRate = sampleRate * oversampAmount; //set by oversample button value
+    spec->maximumBlockSize = samplesPerBlock * oversampAmount; //set by oversample button value
+    spec->numChannels = getTotalNumInputChannels();
 
-    comp.reset();
-    gain.reset();
-    oversamp.reset(new juce::dsp::Oversampling<float>(getNumOutputChannels(), 
-        2, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, false));
+    comp.reset(new juce::dsp::Compressor<float>);
+    gain.reset(new juce::dsp::Gain<float>);
+    oversamp.reset(new juce::dsp::Oversampling<float>(getNumOutputChannels(), 2, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, false));
 
-    comp.prepare(spec);
-    gain.prepare(spec);
+    comp->prepare(*spec.get());
+    gain->prepare(*spec.get()); 
     oversamp->initProcessing((size_t)samplesPerBlock);
 }
 
@@ -173,19 +175,12 @@ void NewProjectAudioProcessor::updateParameters()
     float release = *state->getRawParameterValue("release");
     float gn = *state->getRawParameterValue("gain");
 
-    comp.setThreshold(threshold);
-    comp.setRatio(ratio);
-    comp.setAttack(attack);
-    comp.setRelease(release);
+    comp->setThreshold(threshold);
+    comp->setRatio(ratio);
+    comp->setAttack(attack);
+    comp->setRelease(release);
 
-    gain.setGainDecibels(gn);
-
-    //if (filteringEnabled)
-    //{
-    //    oversamp->factorOversampling = 1;
-    //}
-    //else
-    //    oversamp->factorOversampling = 2;
+    gain->setGainDecibels(gn);
 }
 
 
@@ -194,8 +189,8 @@ void NewProjectAudioProcessor::process(juce::dsp::ProcessContextReplacing<float>
     // Do processing here and output
     updateParameters();
 
-    gain.process(context);
-    comp.process(context);
+    gain->process(context);
+    comp->process(context);
 }
 
 void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -219,6 +214,7 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
     if (filteringEnabled) 
     {
+        oversampAmount = 2;
         juce::dsp::AudioBlock<float> osBlock = oversamp->processSamplesUp(block);
         process(juce::dsp::ProcessContextReplacing<float>(osBlock));
         oversamp->processSamplesDown(block);
@@ -226,6 +222,7 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     else 
     {
         // Output from dsp module
+        oversampAmount = 1;
         process(juce::dsp::ProcessContextReplacing<float>(block));
     }
     
