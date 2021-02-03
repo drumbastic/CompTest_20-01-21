@@ -58,6 +58,7 @@ public:
 
     void updateParameters();
     void process(juce::dsp::ProcessContextReplacing<float> context);
+    void prepareToPlay2(int samplesPerBlock);
 
 private:
 

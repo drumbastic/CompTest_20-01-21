@@ -127,8 +127,8 @@ void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     std::unique_ptr<juce::dsp::ProcessSpec> spec = std::make_unique< juce::dsp::ProcessSpec>();
 
-    spec->sampleRate = sampleRate * oversampAmount; //set by oversample button value
-    spec->maximumBlockSize = samplesPerBlock * oversampAmount; //set by oversample button value
+    spec->sampleRate = sampleRate; //set by oversample button value
+    spec->maximumBlockSize = samplesPerBlock; //set by oversample button value
     spec->numChannels = getTotalNumInputChannels();
 
     comp.reset(new juce::dsp::Compressor<float>);
@@ -139,6 +139,12 @@ void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     gain->prepare(*spec.get()); 
     oversamp->initProcessing((size_t)samplesPerBlock);
 }
+
+//void NewProjectAudioProcessor::prepareToPlay2(int samplesPerBlock)
+//{
+//    oversamp.reset(new juce::dsp::Oversampling<float>(getNumOutputChannels(), 1, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, false));
+//    oversamp->initProcessing((size_t)samplesPerBlock);
+//}
 
 void NewProjectAudioProcessor::releaseResources()
 {
@@ -194,6 +200,7 @@ void NewProjectAudioProcessor::process(juce::dsp::ProcessContextReplacing<float>
 {
     // Do processing here and output
     updateParameters();
+    //prepareToPlay2(context.getInputBlock().getNumSamples());
 
     gain->process(context);
     comp->process(context);
@@ -218,7 +225,8 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         oversampFactor = 0;
         process(juce::dsp::ProcessContextReplacing<float>(block));
     }
-    else {
+    else 
+    {
         switch (oversampSelection)
         {
         case 1: oversampAmount = 2;  oversampFactor = 1; break;
@@ -227,24 +235,7 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         case 4: oversampAmount = 16; oversampFactor = 4; break;
         }
         juce::dsp::AudioBlock<float> osBlock = oversamp->processSamplesUp(block);
-
-       // Not currently working
-       switch (oversampSelection)
-        {
-        case 2: 
-            oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f);
-            break;
-       // case 3: 
-       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
-       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
-       //     break;
-       // case 4: 
-       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
-       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
-       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
-       //     break;
-        }
-        
+        //oversamp.reset(new juce::dsp::Oversampling<float>(getNumOutputChannels(), oversampFactor, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, false));
         process(juce::dsp::ProcessContextReplacing<float>(osBlock));
         oversamp->processSamplesDown(block);
     }    
