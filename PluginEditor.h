@@ -14,7 +14,8 @@
 //==============================================================================
 /**
 */
-class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor
+class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor,
+                                        private juce::ComboBox::Listener
 {
 public:
     NewProjectAudioProcessorEditor (NewProjectAudioProcessor&);
@@ -23,7 +24,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
-    void oversampleChanged();
+    void comboBoxChanged(juce::ComboBox*) override;
 
 private:
     enum OversampleOptions
@@ -32,8 +33,7 @@ private:
         x2,
         x4,
         x8,
-        x16,
-        x32
+        x16
     };
     // Create sliders as pointers to the object
     std::unique_ptr<juce::Slider> thresholdKnob;
@@ -51,7 +51,7 @@ private:
 
     // Create drop down menu
     std::unique_ptr<juce::ComboBox> oversampMenu;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment > oversampMenuAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> oversampMenuAttachment;
 
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.

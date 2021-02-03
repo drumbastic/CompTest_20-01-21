@@ -54,12 +54,12 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     addAndMakeVisible(*(oversampMenu = std::make_unique<juce::ComboBox>("oversamp_menu")));
     oversampMenu->setJustificationType(juce::Justification::centred);
     oversampMenu->addItem("Off", Off);
-    oversampMenu->addItem("2x",  x2);
-    oversampMenu->addItem("4x",  x4);
-    oversampMenu->addItem("8x",  x8);
-    oversampMenu->addItem("16x", x16);
-    oversampMenu->addItem("32x", x32);  
-    oversampMenu->onChange = [this] { oversampleChanged(); };
+    oversampMenu->addItem("x2",  x2);
+    oversampMenu->addItem("x4",  x4);
+    oversampMenu->addItem("x8",  x8);
+    oversampMenu->addItem("x16", x16); 
+    oversampMenu->addListener(this);
+    oversampMenu->onChange = [this] { comboBoxChanged(oversampMenu.get()); };
     oversampMenuAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(p.getState(), "oversamp_menu", *oversampMenu);
     oversampMenu->setSelectedId(Off);
 
@@ -82,7 +82,7 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
     g.setFont (15.0f);
 
     //First row
-    g.drawFittedText("Gain",        ((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
+    g.drawFittedText("Gain",         ((getWidth() / 5) * 2) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
     g.drawFittedText("Oversampling", ((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
     // print state of toggle
     //g.drawFittedText(std::to_string(oversampButton->getToggleState()),((getWidth() / 5) * 3) - (100 / 2), ((getHeight() / 2) / 2) + 5, 100, 100, juce::Justification::centred, false);
@@ -110,37 +110,32 @@ void NewProjectAudioProcessorEditor::resized()
       releaseKnob->setBounds(((getWidth() / 5) * 4) - (100 / 2), ((getHeight() / 2) + ((getHeight() / 2) / 2)) - (100 / 2), 100, 100);
 }
 
-void NewProjectAudioProcessorEditor::oversampleChanged()
+void NewProjectAudioProcessorEditor::comboBoxChanged(juce::ComboBox*)
 {
     switch (oversampMenu->getSelectedId())
     {
-    case Off: 
+    case Off:
         oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
         oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::white);
         oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
         break;
-    case x2:  
+    case x2:
         oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::lightyellow);
         oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::black);
         oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::black);
         break;
-    case x4:  
+    case x4:
         oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::yellow);
         oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::black);
         oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::black);
         break;
-    case x8:  
+    case x8:
         oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::orange);
         oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::black);
         oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::black);
         break;
-    case x16: 
+    case x16:
         oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::orangered);
-        oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::white);
-        oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
-        break;
-    case x32: 
-        oversampMenu->setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::red);
         oversampMenu->setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::white);
         oversampMenu->setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
         break;

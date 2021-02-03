@@ -32,13 +32,9 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
     state->createAndAddParameter("attack", "Attack", "Attack", juce::NormalisableRange<float>(0.0f, 20.0f, 0.1), 10.0, nullptr, nullptr);
     state->createAndAddParameter("release", "Release", "Release", juce::NormalisableRange<float>(0.0f, 200.0f, 0.1), 100.0, nullptr, nullptr);
     state->createAndAddParameter("gain", "Gain", "Gain", juce::NormalisableRange<float>(-100.0f, 0.0f, 1.f), -20.0, nullptr, nullptr);
-    state->createAndAddParameter("oversamp_menu",  // parameter ID
-                                "oversamp_menu",   // parameter name
-                                std::string(),     // parameter label (suffix)
-                                juce::NormalisableRange<float>(0.0f, 6.0f /*list size*/, 1.0f),    // range
-                                0.0f,              // default value
-                                nullptr,
-                                nullptr);
+    juce::NormalisableRange<float> oversampRate(0, 5);
+    state->createAndAddParameter("oversamp_menu", "oversamp_menu", "oversamp_menu", oversampRate, 0, nullptr, nullptr);
+
     state->state = juce::ValueTree("threshold");
     state->state = juce::ValueTree("ratio");
     state->state = juce::ValueTree("attack");
@@ -54,6 +50,7 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
     gain->setGainDecibels(10.0f);
 
     oversampAmount = 1;
+    oversampFactor = 0;
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()   
@@ -136,7 +133,7 @@ void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     comp.reset(new juce::dsp::Compressor<float>);
     gain.reset(new juce::dsp::Gain<float>);
-    oversamp.reset(new juce::dsp::Oversampling<float>(getNumOutputChannels(), 2, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, false));
+    oversamp.reset(new juce::dsp::Oversampling<float>(getNumOutputChannels(), oversampFactor, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, false));
 
     comp->prepare(*spec.get());
     gain->prepare(*spec.get()); 
@@ -208,43 +205,54 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    
     // Input to dsp module
     juce::dsp::AudioBlock<float> block (buffer);
 
-    if (filteringEnabled) 
+    oversampSelection = state->getParameterAsValue("oversamp_menu").getValue();
+    int test = oversamp->getOversamplingFactor();
+    if (oversampSelection == 0)
     {
-        oversampAmount = 2;
-        juce::dsp::AudioBlock<float> osBlock = oversamp->processSamplesUp(block);
-        process(juce::dsp::ProcessContextReplacing<float>(osBlock));
-        oversamp->processSamplesDown(block);
-    }
-    else 
-    {
-        // Output from dsp module
-        oversampAmount = 1;
+        oversampFactor = 0;
         process(juce::dsp::ProcessContextReplacing<float>(block));
     }
-    
+    else {
+        switch (oversampSelection)
+        {
+        case 1: oversampAmount = 2;  oversampFactor = 1; break;
+        case 2: oversampAmount = 4;  oversampFactor = 2; break;
+        case 3: oversampAmount = 8;  oversampFactor = 3; break;
+        case 4: oversampAmount = 16; oversampFactor = 4; break;
+        }
+        juce::dsp::AudioBlock<float> osBlock = oversamp->processSamplesUp(block);
+
+       // Not currently working
+       switch (oversampSelection)
+        {
+        case 2: 
+            oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f);
+            break;
+       // case 3: 
+       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
+       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
+       //     break;
+       // case 4: 
+       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
+       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
+       //     oversamp->addOversamplingStage(juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, 0.1f, -20.f, 0.1f, -20.f); 
+       //     break;
+        }
+        
+        process(juce::dsp::ProcessContextReplacing<float>(osBlock));
+        oversamp->processSamplesDown(block);
+    }    
 }
 
 juce::AudioProcessorValueTreeState& NewProjectAudioProcessor::getState()
 {
     return *state;
-}
-
-void NewProjectAudioProcessor::setFilteringEnbaled(const bool shouldBeEnabled)
-{
-    filteringEnabled = shouldBeEnabled;
 }
 
 //==============================================================================

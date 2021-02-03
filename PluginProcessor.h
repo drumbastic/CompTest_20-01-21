@@ -59,8 +59,6 @@ public:
     void updateParameters();
     void process(juce::dsp::ProcessContextReplacing<float> context);
 
-    void setFilteringEnbaled(const bool shouldBeEnabled);
-
 private:
 
     // Create the state of the value tree
@@ -72,8 +70,9 @@ private:
     std::unique_ptr<juce::dsp::Oversampling<float>> oversamp;
 
     // Set bool for Oversampling
-    bool filteringEnabled;
+    int oversampSelection;
     int oversampAmount;
+    int oversampFactor;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
